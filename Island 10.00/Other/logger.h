@@ -4,7 +4,7 @@
 #include <format>
 #include <cstdio>
 
-inline bool debug = true;
+inline bool debug = true; // Turn this into true/false if you want debug logging.
 
 FILE* stream = nullptr;
 

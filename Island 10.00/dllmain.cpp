@@ -4,7 +4,7 @@
 
 DWORD WINAPI Main(LPVOID)
 {
-    debug = true;
+    debug = true; // Turn this into true/false if you want debug logging.
 
     AllocConsole();
     SetConsoleTitleA(("Island 10.00 || Initializing..."));
