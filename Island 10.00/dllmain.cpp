@@ -21,7 +21,7 @@ DWORD WINAPI Main(LPVOID)
 
     //SDK::UFunction* FN = UObject::FindObject<UFunction>("Function ReadyToStartMatch");
 
-    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"open Athena_Terrian", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"open Athena_Terrain", nullptr);
 
     return 0;
 }
