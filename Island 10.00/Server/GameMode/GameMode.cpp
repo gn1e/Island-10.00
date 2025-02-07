@@ -56,13 +56,13 @@ bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
         FURL URL;
         URL.Port = 7777;
 
-        LogDebug("Starting to listen on port %d...", URL.Port);
+        LogDebug("Starting to listen on port %d", URL.Port);
         if (!InitListen(World, URL, false, Error)) {
             LogError("Failed to initialize listening: %s", *Error);
             return false;
         }
         if (InitListen) {
-            Log("Starting to listen on port %d...", URL.Port);
+            Log("Listening on port %d...", URL.Port); // i think this works?
         }
 
 
