@@ -1,5 +1,6 @@
 #include "GameMode.h"
 #include "..\Other\logger.h"
+#include "..\Other\globals.cpp"
 
 static bool (*ReadyToStartMatchOG)(AFortGameModeAthena*);
 
@@ -20,7 +21,15 @@ bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
 
     if (!bPlaylist) {
         LogDebug("Initializing playlist...");
-        auto Playlist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_DefaultSolo.Playlist_DefaultSolo");
+        UFortPlaylistAthena* Playlist = nullptr;
+
+        if (bSolos) {
+            Playlist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_DefaultSolo.Playlist_DefaultSolo");
+        }
+        else if (bDuos) {
+            Playlist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_DefaultDuo.Playlist_DefaultDuo");
+        }
+
         if (!Playlist) {
             LogError("Failed to find playlist!");
             return false;
@@ -56,13 +65,13 @@ bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
         FURL URL;
         URL.Port = 7777;
 
-        LogDebug("Starting to listen on port %d", URL.Port);
+        LogDebug("Starting to listen on port %d.", URL.Port);
         if (!InitListen(World, URL, false, Error)) {
             LogError("Failed to initialize listening: %s", *Error);
             return false;
         }
         if (InitListen) {
-            Log("Listening on port %d...", URL.Port); // i think this works?
+            Log("Listening on port %d!", URL.Port); // i think this works?
         }
 
 
@@ -73,7 +82,7 @@ bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
 
         SetConsoleTitleA("Island 10.00 || Listening");
         GameMode->bWorldIsReady = true;
-        bListenting = true;
+        bListening = true;
     }
 
     return ReadyToStartMatchOG(GameMode);
