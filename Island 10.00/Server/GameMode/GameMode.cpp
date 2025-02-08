@@ -2,11 +2,16 @@
 #include "..\Other\logger.h"
 #include "..\Other\globals.cpp"
 
-static bool (*ReadyToStartMatchOG)(AFortGameModeAthena*);
+static bool (*OGReadyToStartMatch)(AFortGameModeAthena*);
+
+inline UNetDriver* (*CreateNetDriver)(UEngine*, UWorld*, FName) = decltype(CreateNetDriver)(BaseAddress + 0x33F0490);
+inline bool (*InitListen)(UNetDriver*, void*, FURL&, bool, FString&) = decltype(InitListen)(BaseAddress + 0x6D9070);
+inline void* (*SetWorld)(UNetDriver*, UWorld*) = decltype(SetWorld)(BaseAddress + 0x315EF10);
+inline void (*ServerReplicateActors)(UReplicationDriver*) = decltype(ServerReplicateActors)(BaseAddress + 0xA0DAC0);
 
 bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
     static bool bPlaylist = false;
-    static bool bListening = false;
+    static bool bNetDriver = false;
 
     if (!GameMode || !GameMode->GameState) {
         LogError("Invalid GameMode or GameState!");
@@ -45,45 +50,52 @@ bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
         bPlaylist = true;
     }
 
-    if (!bListening) {
+    if (!bNetDriver) {
         LogDebug("Initializing NetDriver...");
-        auto CreateNetDriver = reinterpret_cast<SDK::UNetDriver * (*)(UEngine*, UWorld*, FName)>(uintptr_t(GetModuleHandle(0)) + 0x5285050);
-        FName NetDriverDefinition = UKismetStringLibrary::Conv_StringToName(L"GameNetDriver");
 
         auto World = UWorld::GetWorld();
-        auto Driver = CreateNetDriver(UEngine::GetEngine(), World, NetDriverDefinition);
-        if (!Driver) {
+        UEngine* Engine = UEngine::GetEngine();
+        if (!Engine || !World) {
+            LogError("Failed to retrieve Engine or World!");
+            return false;
+        }
+
+        World->NetDriver = CreateNetDriver(Engine, World, FName(L"GameNetDriver"));
+        if (!World->NetDriver) {
             LogError("Failed to create NetDriver!");
             return false;
         }
 
-        World->NetDriver = Driver;
-        World->NetDriver->NetDriverName = NetDriverDefinition;
         World->NetDriver->World = World;
+        World->NetDriver->NetDriverName = FName(L"GameNetDriver");
 
-        FString Error;
-        FURL URL;
-        URL.Port = 7777;
-
-        LogDebug("Starting to listen on port %d.", URL.Port);
-        if (!InitListen(World, URL, false, Error)) {
-            LogError("Failed to initialize listening: %s", *Error);
-            return false;
+        if (GameMode->GameSession) {
+            GameMode->GameSession->MaxPlayers = GameState->CurrentPlaylistInfo.BasePlaylist->MaxPlayers;
         }
-        if (InitListen) {
-            Log("Listening on port %d!", URL.Port); // i think this works?
+        else {
+            LogError("GameSession is null!");
         }
 
-
-        SetWorld(World);
         for (auto& Collection : World->LevelCollections) {
             Collection.NetDriver = World->NetDriver;
         }
 
+        GameState->AirCraftBehavior = GameState->CurrentPlaylistInfo.BasePlaylist->AirCraftBehavior;
+        GameState->CachedSafeZoneStartUp = GameState->CurrentPlaylistInfo.BasePlaylist->SafeZoneStartUp;
+
+        FString Error;
+        if (!InitListen(World->NetDriver, World, World->PersistentLevel->URL, false, Error)) {
+            LogError("Failed to listen on port " + std::to_string(Port) + "! Error: " + Error.ToString());
+            return false;
+        }
+
+        SetWorld(World->NetDriver, World);
+        Log("Listening on Port " + std::to_string(Port) + "!");
         SetConsoleTitleA("Island 10.00 || Listening");
+
         GameMode->bWorldIsReady = true;
-        bListening = true;
+        bNetDriver = true;
     }
 
-    return ReadyToStartMatchOG(GameMode);
+    return OGReadyToStartMatch(GameMode);
 }
