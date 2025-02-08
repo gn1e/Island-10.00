@@ -1,5 +1,5 @@
 #include "GameMode.h"
-#include "..\Other\logger.h"
+#include "..\Other\logger.cpp"
 #include "..\Other\globals.cpp"
 
 static bool (*OGReadyToStartMatch)(AFortGameModeAthena*);

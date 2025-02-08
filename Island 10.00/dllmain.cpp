@@ -1,9 +1,10 @@
 #include "framework.h"
 #include "Server/GameMode/GameMode.h"
-#include "Other/logger.h"
+#include "Other/logger.cpp"
 
 DWORD WINAPI Main(LPVOID)
 {
+    BaseAddressHolder BaseAddress;
     debug = true; // Turn this into true/false if you want debug logging.
 
     AllocConsole();
@@ -17,11 +18,20 @@ DWORD WINAPI Main(LPVOID)
     LogDebug(std::format("ImageBase: {}", reinterpret_cast<uintptr_t>(GetModuleHandle(0))));
 
     Log("Intializing hooks");
-    Utils::VirtualHook(&(AFortGameModeAthena::GetDefaultObj()->VTable), 0x42, GameMode::ReadyToStartMatch);
+    auto* GameModeObj = AFortGameModeAthena::GetDefaultObj();
+    if (GameModeObj)
+    {
+        void** VTable = *reinterpret_cast<void***>(GameModeObj);
+        Utils::VirtualHook(VTable, 0x74, GameMode::ReadyToStartMatch);
+    }
+    else
+    {
+        LogError("Failed to get AFortGameModeAthena default object.");
+    }
 
     //SDK::UFunction* FN = UObject::FindObject<UFunction>("Function ReadyToStartMatch");
 
-    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"open Athena_Terrain", nullptr);
+    UKismetSystemLibrary::GetDefaultObj()->ExecuteConsoleCommand(UWorld::GetWorld(), L"open Athena_Terrain", nullptr);
 
     return 0;
 }
