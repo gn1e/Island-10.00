@@ -1,16 +1,13 @@
 #include "framework.h"
 #include "Server/GameMode/GameMode.h"
-#include "Other/logger.cpp"
+#include "Other/logger.h"
 
 DWORD WINAPI Main(LPVOID)
 {
-    BaseAddressHolder BaseAddress;
     debug = true; // Turn this into true/false if you want debug logging.
 
     AllocConsole();
     SetConsoleTitleA(("Island 10.00 || Initializing..."));
-    FILE* File = nullptr;
-    freopen_s(&File, "CONOUT$", "w", stdout);
     stopfnlogs();
 
     MH_Initialize();

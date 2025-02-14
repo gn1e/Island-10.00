@@ -1,15 +1,23 @@
 #include "GameMode.h"
-#include "..\Other\logger.cpp"
+#include "..\Other\logger.h"
 #include "..\Other\globals.cpp"
 
-static bool (*OGReadyToStartMatch)(AFortGameModeAthena*);
+static bool (*OGReadyToStartMatch)(AFortGameModeAthena*) =
+reinterpret_cast<bool(*)(AFortGameModeAthena*)>(BaseAddress + 0x11C1060);
 
-inline UNetDriver* (*CreateNetDriver)(UEngine*, UWorld*, FName) = decltype(CreateNetDriver)(BaseAddress + 0x33F0490);
-inline bool (*InitListen)(UNetDriver*, void*, FURL&, bool, FString&) = decltype(InitListen)(BaseAddress + 0x6D9070);
-inline void* (*SetWorld)(UNetDriver*, UWorld*) = decltype(SetWorld)(BaseAddress + 0x315EF10);
-inline void (*ServerReplicateActors)(UReplicationDriver*) = decltype(ServerReplicateActors)(BaseAddress + 0xA0DAC0);
+inline UNetDriver* (*CreateNetDriver)(UEngine*, UWorld*, FName) =
+reinterpret_cast<decltype(CreateNetDriver)>(BaseAddress + 0x33F0490);
 
-bool ReadyToStartMatch(AFortGameModeAthena* GameMode) {
+inline bool (*InitListen)(UNetDriver*, void*, FURL&, bool, FString&) =
+reinterpret_cast<decltype(InitListen)>(BaseAddress + 0x6D9070);
+
+inline void* (*SetWorld)(UNetDriver*, UWorld*) =
+reinterpret_cast<decltype(SetWorld)>(BaseAddress + 0x315EF10);
+
+inline void (*ServerReplicateActors)(UReplicationDriver*) =
+reinterpret_cast<decltype(ServerReplicateActors)>(BaseAddress + 0xA0DAC0);
+
+bool GameMode::ReadyToStartMatch(AFortGameModeAthena* GameMode) {
     static bool bPlaylist = false;
     static bool bNetDriver = false;
 

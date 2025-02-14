@@ -152,7 +152,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Other\globals.cpp" />
-    <ClInclude Include="Other\logger.cpp" />
+    <ClInclude Include="Other\logger.h" />
     <ClInclude Include="SDK\PropertyFixup.hpp" />
     <ClInclude Include="SDK\SDK.hpp" />
     <ClInclude Include="SDK\UnrealContainers.hpp" />
