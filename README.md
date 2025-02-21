@@ -1,5 +1,7 @@
 # Island 10.00
 
+I've been busy recently, and I dont expect to continue this GS anytime soon.
+
 No in-game yet.
 
 Features:
